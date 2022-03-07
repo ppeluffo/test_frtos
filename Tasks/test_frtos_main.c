@@ -8,19 +8,44 @@
  * crear un projecto con todos los perifericos que usemos y bajar el codigo
  * para ver como se inicializan y se manejan.
  * 
- * Version 1.0 @ 2022-03-07.
- * Este proyecto es para probar el funcionamiento del FRTOS en la plataforma 
- * AVR128DA64 que es la que usamos en nuestros desarrollos
- * En particular lo ajustamos a la placa del sensor de cloro.
+ * -----------------------------------------------------------------------------
+ * Pendiente:
+ * - Implementar el cmdMode(async) de modo de leer en buffers.
+ * - Probar los printf con los buffers leidos por cmdMode
+ * - Implementar la entrada/salida serial con FRTOS-IO
+ * -----------------------------------------------------------------------------
+ * Version 3: Implementamos una salida serial directa con printf.
+ * Agregamos el directorio Drivers con los archivos usart.c y usart.h donde
+ * implemento las funciones de lectura/escritura de los puertos seriales 0 y 4.
+ * El manejo es por poleo.
+ * La placa donde estamos probando usa el puerto 4.
+ * Creo una nueva tarea tk3 que se va a encargar de imprimir un string y donde vamos
+ * a probar las funciones de printf.
+ * Utilizo la funcion vsnprintf del XC8
+ * Formatea bien pero se come el ultimo caracter a veces.
+ * El problema es que al configurar para TICKLESS, luego de poner el ultimo
+ * byte se duerme y por eso a veces no lo transmite.
+ * Para evitarlo, luego de transmitir el buffer debo agregar un busy-loop
+ * con _delay_ms(50) de modo que no entre en sleep y pueda vaciarse los buffers.
  * 
+ * 
+ * -----------------------------------------------------------------------------
+ * Version 2: Modo Tickless
+ * Al codigo anterior le agregamos en FreeRTOSConfig.h la linea
+ * #define configUSE_TICKLESS_IDLE     1
+ * 
+ * -----------------------------------------------------------------------------
  * Version 1: Modo normal ( no pwrsave )
  * Tiene 2 tareas:
  * - Una resetea el watchdog c/5s.
  * - La otra prende y apaga el led.
  * 
- * Version 2: Modo Tickless
- * Al codigo anterior le agregamos en FreeRTOSConfig.h la linea
- * #define configUSE_TICKLESS_IDLE     1
+ * -----------------------------------------------------------------------------
+ * Version 0 @ 2022-03-07.
+ * Este proyecto es para probar el funcionamiento del FRTOS en la plataforma 
+ * AVR128DA64 que es la que usamos en nuestros desarrollos
+ * En particular lo ajustamos a la placa del sensor de cloro.
+ * 
  * 
  * El resultado es que la placa "sensor de cloro" reduce el consumo de 11 a 7mA.
  * ( la placa no esta optimizada para reducir el consumo ).
@@ -56,6 +81,7 @@ int main(void) {
     
     xHandle_tk01 = xTaskCreateStatic( tk01, "TK01", tk01_STACK_SIZE, (void *)1, tk01_TASK_PRIORITY, tk01_Buffer, &tk01_Buffer_Ptr );
     xHandle_tk02 = xTaskCreateStatic( tk02, "TK02", tk02_STACK_SIZE, (void *)1, tk02_TASK_PRIORITY, tk02_Buffer, &tk02_Buffer_Ptr );
+    xHandle_tk03 = xTaskCreateStatic( tk03, "TK03", tk03_STACK_SIZE, (void *)1, tk03_TASK_PRIORITY, tk03_Buffer, &tk03_Buffer_Ptr );
 
     /* Arranco el RTOS. */
 	vTaskStartScheduler();

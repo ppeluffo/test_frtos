@@ -73,9 +73,11 @@ extern "C" {
 
 #define tk01_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 #define tk02_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
+#define tk03_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 
 #define tk01_STACK_SIZE		384
 #define tk02_STACK_SIZE		384
+#define tk03_STACK_SIZE		384
 
 StaticTask_t tk01_Buffer_Ptr;
 StackType_t tk01_Buffer [tk01_STACK_SIZE];
@@ -83,10 +85,14 @@ StackType_t tk01_Buffer [tk01_STACK_SIZE];
 StaticTask_t tk02_Buffer_Ptr;
 StackType_t tk02_Buffer [tk02_STACK_SIZE];
 
-TaskHandle_t xHandle_tk01, xHandle_tk02;
+StaticTask_t tk03_Buffer_Ptr;
+StackType_t tk03_Buffer [tk03_STACK_SIZE];
+
+TaskHandle_t xHandle_tk01, xHandle_tk02, xHandle_tk03;
 
 void tk01(void * pvParameters);
 void tk02(void * pvParameters);
+void tk03(void * pvParameters);
 
 void system_init();
 
@@ -98,6 +104,9 @@ void system_init();
 
 void LED_init(void);
 void led_flash(void);
+
+int xprintf( const char *fmt, ...);
+void xputChar(unsigned char c);
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */
