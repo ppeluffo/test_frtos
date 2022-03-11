@@ -9,19 +9,13 @@
 
 #include "test_frtos.h"
 #include "usart.h"
-#include "string.h"
-//#include "stdarg.h"
-#include "stdio.h"
-#include "printf.h"
+//#include "printf.h"
+#include "xprintf.h"
 
-
-#define PRINTF_BUFFER_SIZE        256U
-static uint8_t stdout_buff[PRINTF_BUFFER_SIZE];
 
 //------------------------------------------------------------------------------
 int8_t WDT_init(void);
 int8_t CLKCTRL_init(void);
-void XPRINTF_init(void);
 
 //-----------------------------------------------------------------------------
 void system_init()
@@ -78,32 +72,5 @@ void led_flash(void)
 	PRENDER_LED();
 	vTaskDelay( (TickType_t)( 100 / portTICK_PERIOD_MS ) );
 	APAGAR_LED();
-}
-//------------------------------------------------------------------------------
-void XPRINTF_init(void)
-{
-    USART4_init();
-}
-//------------------------------------------------------------------------------
-int xprintf( const char *fmt, ...)
-{
-
-	va_list args;
-	int i = 0;
-
-	memset(stdout_buff,'\0',PRINTF_BUFFER_SIZE);
-	va_start(args, fmt);
-	vsnprintf( (char *)stdout_buff,sizeof(stdout_buff),fmt,args);
-    //vsnprintf_( (char *)stdout_buff,sizeof(stdout_buff),fmt,args);
-    //va_end();
-	USART4_sendString( (char *)stdout_buff);
-
-	return(i);
-
-}
-//------------------------------------------------------------------------------
-void xputChar(unsigned char c)
-{
-   USART4_sendChar(c); 
 }
 //------------------------------------------------------------------------------

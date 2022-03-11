@@ -24,6 +24,7 @@ void tk01(void * pvParameters)
 
 		vTaskDelay( ( TickType_t)( 5000 / portTICK_PERIOD_MS ) );
 		wdt_reset();
+       
         
 	}
 }

@@ -66,18 +66,28 @@ extern "C" {
 #include <avr/io.h>
 #include <avr/builtins.h>
 #include <avr/wdt.h> 
-
+#include <avr/pgmspace.h>
+        
 #include "stdbool.h"
+#include "frtos-io.h"
+#include "xprintf.h"
+
+#define FW_REV "1.0.0a"
+#define FW_DATE "@ 20220311"
+#define HW_MODELO "Tcesting FRTOS R001 HW:AVR128DA64"
+#define FRTOS_VERSION "FW:FreeRTOS V202111.00"
 
 #define SYSMAINCLK 24
 
 #define tk01_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 #define tk02_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 #define tk03_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
+#define tk04_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 
 #define tk01_STACK_SIZE		384
 #define tk02_STACK_SIZE		384
 #define tk03_STACK_SIZE		384
+#define tk04_STACK_SIZE		384
 
 StaticTask_t tk01_Buffer_Ptr;
 StackType_t tk01_Buffer [tk01_STACK_SIZE];
@@ -88,13 +98,23 @@ StackType_t tk02_Buffer [tk02_STACK_SIZE];
 StaticTask_t tk03_Buffer_Ptr;
 StackType_t tk03_Buffer [tk03_STACK_SIZE];
 
-TaskHandle_t xHandle_tk01, xHandle_tk02, xHandle_tk03;
+StaticTask_t tk04_Buffer_Ptr;
+StackType_t tk04_Buffer [tk04_STACK_SIZE];
+
+SemaphoreHandle_t sem_SYSVars;
+StaticSemaphore_t SYSVARS_xMutexBuffer;
+#define MSTOTAKESYSVARSSEMPH ((  TickType_t ) 10 )
+
+
+TaskHandle_t xHandle_tk01, xHandle_tk02, xHandle_tk03, xHandle_tk04;
 
 void tk01(void * pvParameters);
 void tk02(void * pvParameters);
 void tk03(void * pvParameters);
+void tk04(void * pvParameters);
 
 void system_init();
+void reset(void);
 
 #define LED_PORT	PORTD
 #define LED_PIN_bm	PIN5_bm
@@ -107,6 +127,16 @@ void led_flash(void);
 
 int xprintf( const char *fmt, ...);
 void xputChar(unsigned char c);
+
+#define MAX_LENGTH 32
+
+struct {
+    int16_t iVal;
+    float fVal;
+    uint16_t rVal;
+    char sVal[MAX_LENGTH];
+    char cVal;
+} systemVars;
 
 
 #endif	/* XC_HEADER_TEMPLATE_H */

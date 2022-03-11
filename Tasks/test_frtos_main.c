@@ -8,13 +8,52 @@
  * crear un projecto con todos los perifericos que usemos y bajar el codigo
  * para ver como se inicializan y se manejan.
  * 
+ * PROBLEMAS:
+ * - Las funciones _P (prgspace) no funcionan
+ * 
  * -----------------------------------------------------------------------------
- * Pendiente:
- * - Implementar el cmdMode(async) de modo de leer en buffers.
- * - Probar los printf con los buffers leidos por cmdMode
- * - Implementar la entrada/salida serial con FRTOS-IO
+ * Version 5: Implemento una funcion que lee la entrada y genera argumentos
+ * En el tkComd (04) implemento que write escriba variables y con read poder 
+ * leerlas.
+ * No puedo tener el tickless habilitado porque no lee.!!
+ * Problemas con strings.
+ * - Si tengo un string inicializado, SI lo puedo imprimir.
+ * - Si lo inicializo, NO se imprime.
+ * No se si el problema esta en la inicializacion o en la impresión !!
+ * - Confirmo que la copia funciona OK. Si luego imprimo como puntero funciona.
+ * - Hago una funcion xputs que imprime directamente un string y funciona bien
+ * lo que confirma que el problema esta en el xprintf("%s")
+ * El problema está en la funcion vsnprinf que viene en el XC8.
+ * Por eso usamos printf.c y la funcion vsnprintf_
+ * 
+ * 
+ * ----------------------------------------------------------------------------- 
+ * Version 4: Implemento el driver de uart para escritura.
+ * Requieren la libreria de ringBuffers
+ * Con esto la trasmision / recepcion es por interrupcion.
+ * Implemento tambien la capa FRTOS-IO
+ * A) Probamos el write sin tickless. Escritura base OK.
+ * B) Paso a tickless: Funciona correctamente agregando el _delay_ms al final del
+ * xprintf.
+ * C) Probamos generar valores de variables globales en una tarea y leerlas y
+ * mostrarlas en otra.
+ * Generamos un uint8_t, int16_t, uint16_t, float, char, string
+ * uint8_t: OK
+ * int16_t: OK
+ * uint16_t: OK
+ * char: OK
+ * float: OK
+ * string: OK
+ * 
+ * Para que imprima floats hay que poner en el linker options la opcion
+ * -Wl,-u,vfprintf -lprintf_flt -lm
+ * https://github.com/microchip-pic-avr-examples/avr128da48-cnano-printf-float-mplab-mcc
+ * 
+ * C) Probamos con strings y formatos en PSTR
+ * - El strncpy_P no funciona bien.
+ * 
  * -----------------------------------------------------------------------------
- * Version 3: Implementamos una salida serial directa con printf.
+ *  * Version 3: Implementamos una salida serial directa con printf.
  * Agregamos el directorio Drivers con los archivos usart.c y usart.h donde
  * implemento las funciones de lectura/escritura de los puertos seriales 0 y 4.
  * El manejo es por poleo.
@@ -77,11 +116,13 @@ int main(void) {
 
 
     system_init();
-    
+    frtos_open(fdTERM, 115200 );
+    sem_SYSVars = xSemaphoreCreateMutexStatic( &SYSVARS_xMutexBuffer );
     
     xHandle_tk01 = xTaskCreateStatic( tk01, "TK01", tk01_STACK_SIZE, (void *)1, tk01_TASK_PRIORITY, tk01_Buffer, &tk01_Buffer_Ptr );
     xHandle_tk02 = xTaskCreateStatic( tk02, "TK02", tk02_STACK_SIZE, (void *)1, tk02_TASK_PRIORITY, tk02_Buffer, &tk02_Buffer_Ptr );
     xHandle_tk03 = xTaskCreateStatic( tk03, "TK03", tk03_STACK_SIZE, (void *)1, tk03_TASK_PRIORITY, tk03_Buffer, &tk03_Buffer_Ptr );
+    xHandle_tk04 = xTaskCreateStatic( tk04, "TK04", tk04_STACK_SIZE, (void *)1, tk04_TASK_PRIORITY, tk04_Buffer, &tk04_Buffer_Ptr );
 
     /* Arranco el RTOS. */
 	vTaskStartScheduler();

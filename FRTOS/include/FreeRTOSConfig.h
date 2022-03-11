@@ -130,6 +130,6 @@ For other frequency values, update clock_config.h with your own settings */
 #define recmuRECURSIVE_MUTEX_TEST_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 2 )
 
 // TICKLESS
-#define configUSE_TICKLESS_IDLE     1
+#define configUSE_TICKLESS_IDLE     0
 
 #endif /* FREERTOS_CONFIG_H */
